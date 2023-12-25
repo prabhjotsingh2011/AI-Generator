@@ -22,6 +22,10 @@ import UserAvatar from "@/components/User-avatar";
 import BotAvatar from "@/components/Bot-avatar";
 
 
+
+
+
+
 const ConversationPage = () => {
     const router = useRouter()
     const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([])
