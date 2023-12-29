@@ -31,30 +31,31 @@ export async function POST(req: Request) {
 
 
         const freeTrail= await checkApiLimit();
+        console.log(!freeTrail,"dfsdfsdf")
         if(!freeTrail){
             return new NextResponse("Free trail has expired",{status:403})
         }
 
-        const response = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages:message
-        })
+        // const response = await openai.createChatCompletion({
+        //     model: "gpt-3.5-turbo",
+        //     messages:message
+        // })
 
         await increaseApiLimit()
-        // const response = {
-        //     data: {
-        //         choices: [
-        //             {message:"demo message"}
-        //         ]
-        //     }
-        // }
-        // return NextResponse.json( {role:"assistant",content:"demo message"})
+        const response = {
+            data: {
+                choices: [
+                    {message:"demo message"}
+                ]
+            }
+        }
+        return NextResponse.json( {role:"assistant",content:"demo message"})
         // {
         //     "role": "assistant",
         //     "content": "The average distance from the Earth to the Sun is about 93 million miles (150 million kilometers)."
         // }
 
-        return NextResponse.json( response.data.choices[0].message)
+        // return NextResponse.json( response.data.choices[0].message)
     } catch (error:any) {
         console.log("[CONVERSATION ERROR]", error)
         return new NextResponse("Internal error",{ status:500})

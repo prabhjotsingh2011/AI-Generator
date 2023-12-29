@@ -4,8 +4,10 @@ import { NextResponse } from 'next/server';
 import { Configuration, OpenAIApi } from 'openai';
 import Replicate from "replicate"
 
-const replicate=new Replicate({
-    auth:process.env.REPLICATE_API_TOKEN
+import { increaseApiLimit, checkApiLimit } from '@/lib/api-limit';
+
+const replicate = new Replicate({
+    auth: process.env.REPLICATE_API_TOKEN
 })
 
 export async function POST(req: Request) {
@@ -15,25 +17,31 @@ export async function POST(req: Request) {
         const { prompt } = body;
 
         if (!userId) {
-            return  new NextResponse("Unauthorized User",{status:401})
+            return new NextResponse("Unauthorized User", { status: 401 })
         }
 
         if (!prompt) {
-            return new NextResponse("Prompt missing",{status:500})
+            return new NextResponse("Prompt missing", { status: 500 })
+        }
+
+        const freeTrail = await checkApiLimit();
+        if (!freeTrail) {
+            return new NextResponse("Free trail has expired", { status: 403 })
         }
 
         const response = await replicate.run(
             "riffusion/riffusion:8cf61ea6c56afd61d8f5b9ffd14d7c216c0a93844ce2d82ac1c9ecc9c7f24e05",
             {
-              input: {
-                prompt_a: prompt
-              }
+                input: {
+                    prompt_a: prompt
+                }
             }
-          );
+        );
 
-        return NextResponse.json( response)
-    } catch (error:any) {
+        await increaseApiLimit()
+        return NextResponse.json(response)
+    } catch (error: any) {
         console.log("[MUSIC ERROR]", error)
-        return new NextResponse("Internal error",{ status:500})
+        return new NextResponse("Internal error", { status: 500 })
     }
 }
